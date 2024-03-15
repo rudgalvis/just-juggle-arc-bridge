@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World!</title>
+
+  </head>
+  <body>
+    <h1>💖 Hello World!</h1>
+    <p>Welcome to your Electron application.</p>
+    <script type="module" src="/src/renderer.ts"></script>
+
+    <script>
+      fetch('http://localhost:55513/269904751')
+        .then(response => response.text())
+        .then(console.log)
+        .catch(console.error)
+    </script>
+  </body>
+</html>
