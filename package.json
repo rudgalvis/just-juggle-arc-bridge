@@ -9,7 +9,8 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx ."
+    "lint": "eslint --ext .ts,.tsx .",
+    "dev-server": "nodemon --watch src/server/index.ts src/server/index.ts"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.3.0",
@@ -44,6 +45,8 @@
     "electron-auto-launch": "^5.0.7",
     "electron-squirrel-startup": "^1.0.0",
     "express": "^4.18.3",
-    "rollup-plugin-copy": "^3.5.0"
+    "nodemon": "^3.1.0",
+    "rollup-plugin-copy": "^3.5.0",
+    "vitest": "^1.4.0"
   }
 }

@@ -11,7 +11,12 @@ const port = 55513; // random port representing JJGLE where 5 is J & G, 1 is L, 
 server.use(cors());
 
 // Create / route
-server.get('/:tabId', async (req, res) => {
+server.get('/ping', async (req, res) => {
+    res.status(200)
+    res.send('pong')
+});
+
+server.get('/tab/:tabId', async (req, res) => {
     const data = await getSidebarJson();
 
     const spaces = spacesData(data);
@@ -20,14 +25,16 @@ server.get('/:tabId', async (req, res) => {
 
     const space = tabs.filter(e => e.tabId === +req.params.tabId);
 
-    if(space[0]) {
-        res.json(space[0]);
+    if (space[0]) {
+        return res.json(space[0]);
     } else {
         res.status(404)
-        res.json({error: 'No space found'})
+        return res.json({error: 'No space found'})
     }
 });
 
 export const startServer = () => server.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
 });
+
+startServer()

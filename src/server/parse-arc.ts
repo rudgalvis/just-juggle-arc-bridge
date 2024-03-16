@@ -1,6 +1,11 @@
 import fs from "fs";
 import * as os from "os";
 
+
+type Required<T> = T & {
+    [key: string]: any;
+}
+
 export const getSidebarJson = async () => {
     const {username} = os.userInfo();
 
@@ -59,7 +64,7 @@ export const tabsData = (items: any, spaces: any) => {
         .filter(e => e.tabId)
 }
 
-export const findElement = (obj: object[], id: string) => {
+export const findElement = (obj: Required<{ id: string }>[], id: string) => {
     let r = null;
 
     obj.some(e => {
@@ -98,4 +103,8 @@ export function flattenObject(obj, parent = '', res = {}) {
         }
     }
     return res;
+}
+
+export const sortByLastUsed = (obj: any) => {
+    // TODO:
 }
