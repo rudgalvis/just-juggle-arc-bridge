@@ -1,5 +1,5 @@
 {
-  "name": "just-jugle-arc-bridge",
+  "name": "@jj/just-jugle-arc-bridge",
   "productName": "Just Juggle - Arc Bridge",
   "version": "0.1.0",
   "description": "My Electron application description",
