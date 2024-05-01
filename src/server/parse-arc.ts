@@ -1,7 +1,6 @@
 import fs from "fs";
 import * as os from "os";
 
-
 type Required<T> = T & {
     [key: string]: any;
 }
@@ -38,12 +37,9 @@ export const itemsData = (sidabarJson: any) => {
         .map(e => e.items)
         .reduce((acc, val) => acc.concat(val), [])
         .reduce((acc, val, i) => {
-            if (i % 2 === 0) {
-
-            } else {
+            if (i % 2 !== 0) {
                 acc[acc.length] = val;
             }
-
             return acc;
         }, []);
 }
@@ -92,6 +88,31 @@ export const deepestParent = (obj: any): any => {
     }
     return obj;
 };
+
+export const latestActiveTabs = (items: any, spaces: any) => {
+
+    return items
+        .filter(e => typeof e !== 'string')
+        .filter(e => e.data?.tab)
+        .map(e => ({
+            tab: e.data.tab,
+            timeLastActiveAt: e.data.tab.timeLastActiveAt,
+            id: e.id,
+            parentID: e.parentID
+        }))
+        .sort((a: any, b: any) => b.timeLastActiveAt - a.timeLastActiveAt)
+        .map(e => populateParentTree(e, items))
+        .map(e => {
+            const spaceID = deepestParent(e).data.itemContainer.containerType.spaceItems?._0;
+            const spaceName = spaces.filter(e => e.id === spaceID).map(e => e.title)[0];
+
+            return {
+                ...e,
+                spaceID,
+                spaceName
+            }
+        })
+}
 
 export function flattenObject(obj, parent = '', res = {}) {
     for (let key in obj) {

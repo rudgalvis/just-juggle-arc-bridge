@@ -81,7 +81,6 @@ app.on('activate', () => {
 let tray = null
 app.whenReady().then(() => {
     const trayIconPath = path.join(__dirname, 'assets', 'macos-tray-Template.png');
-//  const trayIcon = nativeImage.createFromPath(trayIconPath);
     tray = new Tray(trayIconPath)
     const contextMenu = Menu.buildFromTemplate([
         {

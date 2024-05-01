@@ -2,7 +2,7 @@
   "name": "@jj/just-jugle-arc-bridge",
   "productName": "Just Juggle - Arc Bridge",
   "version": "0.1.0",
-  "description": "My Electron application description",
+  "description": "App to bridge Just Juggle and Arc",
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -10,7 +10,7 @@
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx .",
-    "dev-server": "dotenv -e .env.development -- nodemon --watch src/server/index.ts src/server/index.ts"
+    "dev-server": "dotenv -e .env.development -- nodemon --watch src src/server/index.ts"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.3.0",

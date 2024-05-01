@@ -10,7 +10,7 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 const config: ForgeConfig = {
     packagerConfig: {
         asar: true,
-        icon: './assets/mac-icon' // no file extension required
+        icon: './assets/mac-icon', // no file extension required,
     },
     rebuildConfig: {},
     makers: [new MakerSquirrel({}), new MakerZIP({}, ['darwin']), new MakerRpm({}), new MakerDeb({}),
