@@ -1,0 +1,13 @@
+diff --git a/node_modules/@electron/asar/lib/filesystem.js b/node_modules/@electron/asar/lib/filesystem.js
+index 27b00a1..4aa082d 100644
+--- a/node_modules/@electron/asar/lib/filesystem.js
++++ b/node_modules/@electron/asar/lib/filesystem.js
+@@ -101,7 +101,7 @@ class Filesystem {
+   insertLink (p) {
+     const symlink = fs.readlinkSync(p)
+     const parentPath = path.dirname(p)
+-    const link = path.relative(fs.realpathSync(this.src), path.join(parentPath, symlink))
++    const link = path.relative(fs.realpathSync(this.src), fs.realpathSync(path.join(parentPath, symlink)))
+     if (link.substr(0, 2) === '..') {
+       throw new Error(`${p}: file "${link}" links out of the package`)
+     }
