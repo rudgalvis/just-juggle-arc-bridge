@@ -14,6 +14,15 @@ export const getSidebarJson = async () => {
 
     return JSON.parse(contents);
 }
+export const getStorableLiveData = async () => {
+    const {username} = os.userInfo();
+
+    const filePath = `/Users/${username}/Library/Application Support/Arc/StorableWindows.json`;
+
+    const contents = await fs.readFileSync(filePath, 'utf-8');
+
+    return JSON.parse(contents);
+}
 
 export const spacesData = (sidabarJson: any) => {
     return sidabarJson.sidebar.containers
@@ -89,6 +98,32 @@ export const deepestParent = (obj: any): any => {
     return obj;
 };
 
+export const latestActiveTabsLean = (items: any, spaces: any) => {
+    return items
+        .filter(e => typeof e !== 'string')
+        .filter(e => e.data?.tab)
+        .map(e => ({
+            tab: e.data.tab,
+            timeLastActiveAt: e.data.tab.timeLastActiveAt,
+            id: e.id,
+            parentID: e.parentID
+        }))
+        .sort((a: any, b: any) => b.timeLastActiveAt - a.timeLastActiveAt)
+        .map(e => populateParentTree(e, items))
+        .map(e => {
+            const spaceID = deepestParent(e).data.itemContainer.containerType.spaceItems?._0;
+            const spaceName = spaces.filter(e => e.id === spaceID).map(e => e.title)[0];
+
+            return {
+                id: e.id,
+                tab: e.tab,
+//                ...e,
+                spaceID,
+                spaceName
+            }
+        })
+}
+
 export const latestActiveTabs = (items: any, spaces: any) => {
 
     return items
@@ -107,7 +142,8 @@ export const latestActiveTabs = (items: any, spaces: any) => {
             const spaceName = spaces.filter(e => e.id === spaceID).map(e => e.title)[0];
 
             return {
-                ...e,
+//                ...e,
+                tab: e.tab,
                 spaceID,
                 spaceName
             }
