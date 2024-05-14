@@ -29,9 +29,9 @@ jobs:
                   
           git pull
           
-          dst="./../file-server/just-juggle/distribution"
+          dst="./../file-server/just-juggle"
           
           # Create the destination directory if it doesn't exist
           mkdir -p "$dst"
           
-          cp -Rf ./distribution/* "$dst"
+          cp -Rf ./distribution/* "$dst/"
