@@ -2,8 +2,8 @@
 
 const {exec} = require("child_process");
 
-const run = async (command) => new Promise((res, rej) => {
-    exec(command, (error, stdout) => {
+const run = async (command, options) => new Promise((res, rej) => {
+    exec(command, options, (error, stdout) => {
         if (error) {
             const message = `error: ${error}`
 
@@ -25,7 +25,11 @@ const dmgSourcePath = './out/make'
 const dmgFilename = 'JustJuggle-ArcBridge-beta.dmg'
 
 run(`cp ${dmgSourcePath}/${dmgFilename} ${macDistribution}/src/${dmgFilename}`).then(() => {
-    run(`zip -r ${macDistribution}/${zipName}.zip ${macDistribution}`)
+    run(`zip -r ${zipName}.zip .`, { cwd: `${macDistribution}/src` }).then(() => {
+          run(`mv ${macDistribution}/src/${zipName}.zip ${macDistribution}/${zipName}.zip`).then(() => {
+              console.log(`Mac distribution zipped`)
+          })
+    })
 })
 
 
