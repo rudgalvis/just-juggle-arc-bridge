@@ -29,7 +29,7 @@ jobs:
                   
           git pull
           
-          dst="./../file-server/distribution"
+          dst="./../file-server/just-juggle/distribution"
           
           # Create the destination directory if it doesn't exist
           mkdir -p "$dst"
