@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import {exec} from "child_process";
+const {exec} = require("child_process");
 
-const executeCommand = async (command) => new Promise((res, rej) => {
+const run = async (command) => new Promise((res, rej) => {
     exec(command, (error, stdout) => {
         if (error) {
             const message = `error: ${error}`
@@ -15,7 +15,17 @@ const executeCommand = async (command) => new Promise((res, rej) => {
     });
 })
 
-const macDmgSource = './out/make/JustJuggle-ArcBridge-beta.dmg'
-const macDmgDestionation = './out/make/JustJuggle-ArcBridge-beta.dmg'
+const zipName = `JustJuggle-ArcBridge`
 
-executeCommand(`cp ${macDmgSource} ${macDmgDestionation}`)
+const distribution = './distribution'
+
+/* Mac */
+const macDistribution = `${distribution}/mac`
+const dmgSourcePath = './out/make'
+const dmgFilename = 'JustJuggle-ArcBridge-beta.dmg'
+
+run(`cp ${dmgSourcePath}/${dmgFilename} ${macDistribution}/src/${dmgFilename}`).then(() => {
+    run(`zip -r ${macDistribution}/${zipName}.zip ${macDistribution}`)
+})
+
+

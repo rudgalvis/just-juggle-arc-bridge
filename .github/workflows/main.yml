@@ -17,9 +17,21 @@ jobs:
         username: ${{ secrets.SERVER_USERNAME }}
         key: ${{ secrets.SERVER_SSH_KEY }}
         script: |
-          cd /home/ci-bot/just-juggle-lib
+          cd /home/ci-bot
+          
+          if [ -d "just-juggle-arc-bridge" ]; then
+            echo "Directory just-juggle-arc-bridge exists."
+          else
+            git clone git@github.com:rudgalvis/just-juggle-arc-bridge.git
+          fi
+                  
+          cd just-juggle-arc-bridge
+                  
           git pull
-          cd /home/ci-bot/just-juggle-app
-          git pull
-          chmod +x ./.docker/deploy.sh
-          ./.docker/deploy.sh
+          
+          dst="./../file-server/distribution"
+          
+          # Create the destination directory if it doesn't exist
+          mkdir -p "$dst"
+          
+          mv ./distribution/ "$dst"

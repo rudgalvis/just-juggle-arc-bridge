@@ -9,6 +9,7 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
+    "distribute":  "node ./package-distribution.js",
     "lint": "eslint --ext .ts,.tsx .",
     "dev-server": "dotenv -e .env.development -- nodemon --watch src src/server/index.ts"
   },
