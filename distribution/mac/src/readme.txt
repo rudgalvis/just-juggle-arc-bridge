@@ -1,4 +1,4 @@
-Watch video instructions: https://youtu.be/echrexOSHXda
+Watch video instructions: https://youtu.be/J-kEcVpkFNk
 
 This application is developed by Rokas Rudgalvis <rokas@rudgalvis.com>,
 a developer who is currently not signed up for Apple Developer Program.
