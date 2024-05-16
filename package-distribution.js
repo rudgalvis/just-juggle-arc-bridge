@@ -20,12 +20,12 @@ const zipName = `JustJuggle-ArcBridge`
 const distribution = './distribution'
 
 /* Mac */
-const macDistroSrc = `${distribution}/mac`
+const macDistroSrc = `${distribution}/mac/src`
 const dmgFilename = 'JustJuggle-ArcBridge-beta.dmg'
 
 run(`cp ./out/make/${dmgFilename} ${macDistroSrc}/${dmgFilename}`).then(() => {
     run(`zip -r ${zipName}.zip .`, { cwd: `${macDistroSrc}` }).then(() => {
-          run(`mv ${macDistroSrc}/${zipName}.zip ${macDistroSrc}/${zipName}.zip`).then(() => {
+          run(`mv ${macDistroSrc}/${zipName}.zip ${macDistroSrc}/../${zipName}.zip`).then(() => {
               console.log(`Mac distribution zipped`)
           })
     })
