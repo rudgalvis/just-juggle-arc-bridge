@@ -1,5 +1,5 @@
 import {expect, test} from 'vitest'
-import { spacesData } from "../../src/server/parse-arc";
+import { parseSpacesData } from "../../src/server/parse-arc";
 import { items } from "./mock-data/parsed-items";
 import { sidebar } from "./mock-data/StorableSidebar";
 

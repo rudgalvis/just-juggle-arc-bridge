@@ -1,30 +1,32 @@
 import fs from "fs";
 import * as os from "os";
 
+// TODO: strict type it all
+
 type Required<T> = T & {
     [key: string]: any;
 }
 
-export const getSidebarJson = async () => {
-    const {username} = os.userInfo();
-
-    const filePath = `/Users/${username}/Library/Application Support/Arc/StorableSidebar.json`;
-
-    const contents = await fs.readFileSync(filePath, 'utf-8');
+const parseContents = async (path: string): Promise<object> => {
+    const contents = await fs.readFileSync(path, 'utf-8');
 
     return JSON.parse(contents);
+
 }
+
+export const getStorableSidebar = async () => {
+    const {username} = os.userInfo();
+
+    return parseContents(`/Users/${username}/Library/Application Support/Arc/StorableSidebar.json`);
+}
+
 export const getStorableLiveData = async () => {
     const {username} = os.userInfo();
 
-    const filePath = `/Users/${username}/Library/Application Support/Arc/StorableWindows.json`;
-
-    const contents = await fs.readFileSync(filePath, 'utf-8');
-
-    return JSON.parse(contents);
+    return parseContents(`/Users/${username}/Library/Application Support/Arc/StorableWindows.json`);
 }
 
-export const spacesData = (sidabarJson: any) => {
+export const parseSpacesData = (sidabarJson: any): any => {
     return sidabarJson.sidebar.containers
         .filter((e: any) => e.spaces)
         .map((e: any) => e.spaces)
@@ -51,22 +53,6 @@ export const itemsData = (sidabarJson: any) => {
             }
             return acc;
         }, []);
-}
-
-export const tabsData = (items: any, spaces: any) => {
-    return items
-        .map(e => populateParentTree(e, items))
-        .map(e => {
-            const spaceID = deepestParent(e).data.itemContainer.containerType.spaceItems?._0;
-
-            const spaceName = spaces.filter(e => e.id === spaceID).map(e => e.title)[0];
-
-            return {
-                tabId: e.data?.tab?.tabId,
-                spaceName
-            };
-        })
-        .filter(e => e.tabId)
 }
 
 export const findElement = (obj: Required<{ id: string }>[], id: string) => {
@@ -98,32 +84,6 @@ export const deepestParent = (obj: any): any => {
     return obj;
 };
 
-export const latestActiveTabsLean = (items: any, spaces: any) => {
-    return items
-        .filter(e => typeof e !== 'string')
-        .filter(e => e.data?.tab)
-        .map(e => ({
-            tab: e.data.tab,
-            timeLastActiveAt: e.data.tab.timeLastActiveAt,
-            id: e.id,
-            parentID: e.parentID
-        }))
-        .sort((a: any, b: any) => b.timeLastActiveAt - a.timeLastActiveAt)
-        .map(e => populateParentTree(e, items))
-        .map(e => {
-            const spaceID = deepestParent(e).data.itemContainer.containerType.spaceItems?._0;
-            const spaceName = spaces.filter(e => e.id === spaceID).map(e => e.title)[0];
-
-            return {
-                id: e.id,
-                tab: e.tab,
-//                ...e,
-                spaceID,
-                spaceName
-            }
-        })
-}
-
 export const latestActiveTabs = (items: any, spaces: any) => {
 
     return items
@@ -142,26 +102,9 @@ export const latestActiveTabs = (items: any, spaces: any) => {
             const spaceName = spaces.filter(e => e.id === spaceID).map(e => e.title)[0];
 
             return {
-//                ...e,
                 tab: e.tab,
                 spaceID,
                 spaceName
             }
         })
-}
-
-export function flattenObject(obj, parent = '', res = {}) {
-    for (let key in obj) {
-        let newKey = parent ? `${parent}.${key}` : key;
-        if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
-            flattenObject(obj[key], newKey, res);
-        } else {
-            res[newKey] = obj[key];
-        }
-    }
-    return res;
-}
-
-export const sortByLastUsed = (obj: any) => {
-    // TODO:
 }
