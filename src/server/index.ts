@@ -9,7 +9,7 @@ import {
 } from "./parse-arc";
 
 const server = express();
-const port =  process.env.PORT || 55513; // random port representing JJGLE where 5 is J & G, 1 is L, 3 is E
+const port = process.env.PORT || 55513; // random port representing JJGLE where 5 is J & G, 1 is L, 3 is E
 server.use(cors());
 
 server.get('/ping', async (req, res) => {
@@ -24,6 +24,9 @@ server.get('/recent-space', async (_, res) => {
 
     // Parsing data into usable format
     const spaces = parseSpacesData(storableSidebar);
+
+    if (!spaces?.length) return res.json({spaceName: 'No spaces found', knownTab: null})
+
     const spaceName = spaces.filter(e => e.id === (storableLiveData as any).lastFocusedSpaceID).map(e => e.title)[0];
     const items = itemsData(storableSidebar);
     const tabs = latestActiveTabs(items, spaces)

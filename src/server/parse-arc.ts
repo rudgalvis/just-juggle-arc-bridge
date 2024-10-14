@@ -10,8 +10,12 @@ type Required<T> = T & {
 const parseContents = async (path: string): Promise<object> => {
     const contents = await fs.readFileSync(path, 'utf-8');
 
-    return JSON.parse(contents);
-
+    try {
+        return JSON.parse(contents);
+    } catch (e) {
+        console.log(e)
+        return undefined
+    }
 }
 
 export const getStorableSidebar = async () => {
@@ -27,6 +31,9 @@ export const getStorableLiveData = async () => {
 }
 
 export const parseSpacesData = (sidabarJson: any): any => {
+    if(!sidabarJson) return []
+
+
     return sidabarJson.sidebar.containers
         .filter((e: any) => e.spaces)
         .map((e: any) => e.spaces)
@@ -43,7 +50,7 @@ export const parseSpacesData = (sidabarJson: any): any => {
 }
 
 export const itemsData = (sidabarJson: any) => {
-    return sidabarJson.sidebar.containers
+    return sidabarJson?.sidebar?.containers
         .filter(e => e.items)
         .map(e => e.items)
         .reduce((acc, val) => acc.concat(val), [])
@@ -85,7 +92,6 @@ export const deepestParent = (obj: any): any => {
 };
 
 export const latestActiveTabs = (items: any, spaces: any) => {
-
     return items
         .filter(e => typeof e !== 'string')
         .filter(e => e.data?.tab)
