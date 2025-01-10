@@ -24,7 +24,7 @@ export const getStorableSidebar = async () => {
     return parseContents(`/Users/${username}/Library/Application Support/Arc/StorableSidebar.json`);
 }
 
-export const getStorableLiveData = async () => {
+export const getStorableWindows = async (): Promise<any> => {
     const {username} = os.userInfo();
 
     return parseContents(`/Users/${username}/Library/Application Support/Arc/StorableWindows.json`);
@@ -114,3 +114,22 @@ export const latestActiveTabs = (items: any, spaces: any) => {
             }
         })
 }
+
+export const latestActiveWindow = (windows: any[]) => {
+    let min = -1, index = -1
+    windows.forEach(({itemLastActiveDates}, i)=> {
+        if(min === -1) {
+            min = itemLastActiveDates
+            index = i
+        }
+
+        if(itemLastActiveDates < min) {
+            min = itemLastActiveDates
+            index = i
+        }
+    })
+
+    return windows[index]
+}
+
+export const getSpaceNameById = (spaces: any[], id: string) => spaces.filter(e => e.id ===id).map(e => e.title)[0];

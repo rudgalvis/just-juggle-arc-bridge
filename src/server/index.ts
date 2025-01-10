@@ -1,10 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import {
+    getSpaceNameById,
     getStorableSidebar,
-    getStorableLiveData,
+    getStorableWindows,
     itemsData,
-    latestActiveTabs,
+    latestActiveTabs, latestActiveWindow,
     parseSpacesData,
 } from "./parse-arc";
 
@@ -20,14 +21,15 @@ server.get('/ping', async (req, res) => {
 server.get('/recent-space', async (_, res) => {
     // Arc storable data
     const storableSidebar = await getStorableSidebar();
-    const storableLiveData = await getStorableLiveData();
+    const {windows} = await getStorableWindows()
+    const {focusedSpaceID} = latestActiveWindow(windows)
 
     // Parsing data into usable format
     const spaces = parseSpacesData(storableSidebar);
 
     if (!spaces?.length) return res.json({spaceName: 'No spaces found', knownTab: null})
 
-    const spaceName = spaces.filter(e => e.id === (storableLiveData as any).lastFocusedSpaceID).map(e => e.title)[0];
+    const spaceName = getSpaceNameById(spaces, focusedSpaceID);
     const items = itemsData(storableSidebar);
     const tabs = latestActiveTabs(items, spaces)
     const knownTabIndex = tabs.findIndex(e => !!e.spaceName)
@@ -39,6 +41,6 @@ server.get('/recent-space', async (_, res) => {
     })
 })
 
-export const startServer = () => server.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}/`);
+export const startServer = (p = port) => server.listen(p, () => {
+    console.log(`Server running at http://localhost:${p}/`);
 });

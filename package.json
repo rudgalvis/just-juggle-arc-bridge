@@ -11,7 +11,7 @@
     "publish": "electron-forge publish",
     "distribute":  "node ./package-distribution.js",
     "lint": "eslint --ext .ts,.tsx .",
-    "dev-server": "dotenv -e .env.development -- nodemon --watch src src/server/index.ts"
+    "dev-server": "dotenv -e .env.development -- nodemon --watch src src/server/local-serve-dev.ts"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.3.0",
