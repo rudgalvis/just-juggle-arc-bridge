@@ -6,10 +6,10 @@
   "main": ".vite/build/main.js",
   "scripts": {
     "dev": "electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish",
-    "distribute":  "node ./package-distribution.js",
+    "package": "dotenv -e .env.development -- electron-forge package",
+    "make": "dotenv -e .env.development -- electron-forge make",
+    "publish": "dotenv -e .env.development -- electron-forge publish",
+    "distribute": "dotenv -e .env.development -- node ./package-distribution.js",
     "lint": "eslint --ext .ts,.tsx .",
     "dev-server": "dotenv -e .env.development -- nodemon --watch src src/server/local-serve-dev.ts"
   },
