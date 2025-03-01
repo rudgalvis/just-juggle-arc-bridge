@@ -19,6 +19,7 @@ server.get('/ping', async (req, res) => {
 });
 
 server.get('/recent-space', async (_, res) => {
+    console.time('Space name parsed')
     // Arc storable data
     const storableSidebar = await getStorableSidebar();
     const {windows} = await getStorableWindows()
@@ -34,6 +35,8 @@ server.get('/recent-space', async (_, res) => {
     const tabs = latestActiveTabs(items, spaces)
     const knownTabIndex = tabs.findIndex(e => !!e.spaceName)
     const knownTab = tabs[knownTabIndex]
+
+    console.timeEnd('Space name parsed')
 
     res.json({
         spaceName,
