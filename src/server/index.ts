@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import { ArcMacService, getData } from '../services/arc-mac.service'
 import {
     getSpaceNameById,
     getStorableSidebar,
@@ -20,27 +21,16 @@ server.get('/ping', async (req, res) => {
 
 server.get('/recent-space', async (_, res) => {
     console.time('Space name parsed')
-    // Arc storable data
-    const storableSidebar = await getStorableSidebar();
-    const {windows} = await getStorableWindows()
-    const {focusedSpaceID} = latestActiveWindow(windows)
 
-    // Parsing data into usable format
-    const spaces = parseSpacesData(storableSidebar);
+    const arcMacService =  new ArcMacService();
+    const spaceName = await arcMacService.getLastActiveSpaceName()
 
-    if (!spaces?.length) return res.json({spaceName: 'No spaces found', knownTab: null})
-
-    const spaceName = getSpaceNameById(spaces, focusedSpaceID);
-    const items = itemsData(storableSidebar);
-    const tabs = latestActiveTabs(items, spaces)
-    const knownTabIndex = tabs.findIndex(e => !!e.spaceName)
-    const knownTab = tabs[knownTabIndex]
+    if(!spaceName) return res.json({ error: 'No space name found' })
 
     console.timeEnd('Space name parsed')
 
     res.json({
         spaceName,
-        ...knownTab
     })
 })
 

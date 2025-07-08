@@ -23,8 +23,8 @@ test('test', async () => {
     console.log({
         focusedSpaceID,
         spaces,
-        knownTab
+        knownTab,
 //        windows,
-//        spaceName
+        spaceName
     })
 })
