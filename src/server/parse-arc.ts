@@ -28,10 +28,13 @@ export const getStorableWindows = async (): Promise<any> => {
     const {username} = os.userInfo();
 
     return parseContents(`/Users/${username}/Library/Application Support/Arc/StorableWindows.json`);
+//    return parseContents(``);
 }
 
 export const parseSpacesData = (sidabarJson: any): any => {
     if(!sidabarJson) return []
+
+    console.log(sidabarJson)
 
 
     return sidabarJson.sidebar.containers
