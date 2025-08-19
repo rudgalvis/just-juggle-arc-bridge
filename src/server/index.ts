@@ -1,10 +1,12 @@
+import express, { type NextFunction } from 'express'
 import cors from "cors";
-import express from "express";
 import { ArcMacService } from "../services/arc-mac.service";
 
 const server = express();
 const port = process.env.PORT || 55513; // random port representing JJGLE where 5 is J & G, 1 is L, 3 is E
-server.use(cors());
+server.use((req, res, next) => {
+  next();
+}, cors({ maxAge: 84600 }));
 
 server.get("/ping", async (req, res) => {
   res.status(200);

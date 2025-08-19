@@ -9,20 +9,21 @@ import { FuseV1Options, FuseVersion } from "@electron/fuses";
 
 const config: ForgeConfig = {
   packagerConfig: {
-    asar: true,
+    ignore: [],
+    asar: false,
     icon: "./assets/mac-icon", // no file extension required
-    appBundleId: process.env.APP_BUNDLE_ID,
-    extendInfo: {
-      LSMinimumSystemVersion: "12.0.0",
-    },
-    osxSign: {
-      identity: process.env.APPLE_SIGNING_IDENTITY,
-    },
-    osxNotarize: {
-      appleId: process.env.APPLE_ID,
-      appleIdPassword: process.env.APPLE_APP_SPECIFIC_PASSWORD,
-      teamId: process.env.APPLE_TEAM_ID,
-    },
+//    appBundleId: process.env.APP_BUNDLE_ID,
+//    extendInfo: {
+//      LSMinimumSystemVersion: "12.0.0",
+//    },
+//    osxSign: {
+//      identity: process.env.APPLE_SIGNING_IDENTITY,
+//    },
+//    osxNotarize: {
+//      appleId: process.env.APPLE_ID,
+//      appleIdPassword: process.env.APPLE_APP_SPECIFIC_PASSWORD,
+//      teamId: process.env.APPLE_TEAM_ID,
+//    },
   },
   rebuildConfig: {},
   makers: [
@@ -81,12 +82,12 @@ const config: ForgeConfig = {
     // at package time, before code signing the application
     new FusesPlugin({
       version: FuseVersion.V1,
-      [FuseV1Options.RunAsNode]: false,
-      [FuseV1Options.EnableCookieEncryption]: true,
-      [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
-      [FuseV1Options.EnableNodeCliInspectArguments]: false,
-      [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
-      [FuseV1Options.OnlyLoadAppFromAsar]: true,
+//      [FuseV1Options.RunAsNode]: false,
+//      [FuseV1Options.EnableCookieEncryption]: true,
+//      [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
+//      [FuseV1Options.EnableNodeCliInspectArguments]: false,
+//      [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
+      [FuseV1Options.OnlyLoadAppFromAsar]: false,
     }),
   ],
 };
