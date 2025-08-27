@@ -1,6 +1,8 @@
 import os from "os";
 import { readJsonFile } from "../utils/read-json-file";
 
+type StorableSidebar = unknown
+
 type StorableWindows = Record<string, unknown> & {
   windows: Record<string, unknown>[];
   lastFocusedSpaceID: string;
@@ -46,11 +48,12 @@ export class ArcMacService {
 
     this.sidebarArcData = $sidebar;
     this.windowsArcData = $windows;
-    this.spacesMap = this.parseSpaces($sidebar); // Spaces must be parsed before windows
-    this.windows = this.parseWindows($windows); // Depends on parsed spaces
-    this.profiles = this.parseProfileSpaces($sidebar);
 
+    // Respect this order of operations
+    this.spacesMap = this.parseSpaces($sidebar);
+    this.profiles = this.parseProfiles($sidebar);
     this.inferMissingSpaceNames();
+    this.windows = this.parseWindows($windows); // Depends on parsed spaces
   }
 
   async isReady() {
@@ -74,7 +77,7 @@ export class ArcMacService {
     return readJsonFile(path);
   };
 
-  private parseSpaces(jsonData: unknown): Space[] {
+  private parseSpaces(jsonData: StorableSidebar): Space[] {
     const spaces: Space[] = [];
 
     if (jsonData === undefined) return spaces;
@@ -169,7 +172,7 @@ export class ArcMacService {
     return parsed;
   }
 
-  private parseProfileSpaces(jsonData: unknown): Profile[] {
+  private parseProfiles(jsonData: StorableSidebar): Profile[] {
     const defaultSpaces: Space[] = [];
     const customGroups = new Map<string, Profile>();
 
@@ -257,7 +260,7 @@ export class ArcMacService {
         const inferredName = uniqueSpaceNames[0];
 
         undefinedSpaces.forEach((space) => {
-          //          console.log(`Inferring space name for ${space.id}: ${inferredName}`);
+                    console.log(`Inferring space name for ${space.id}: ${inferredName}`);
           space.name = inferredName;
 
           // Also update the corresponding space in this.spaces array
