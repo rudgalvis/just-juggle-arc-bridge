@@ -1,15 +1,20 @@
 import os from "os";
 import { readJsonFile } from "../utils/read-json-file";
 
+type StorableWindows = Record<string, unknown> & {
+  windows: Record<string, unknown>[];
+  lastFocusedSpaceID: string;
+};
+
 interface Space {
   id: string;
-  name: string;
+  name?: string;
   lastChangeDate?: number;
 }
 
-interface LastFocused {
-  global: string | undefined; // Confidence is mid. Use only if space is undefined in windows
-  windows: { spaceId: string; lastActivatedItem: number }[]; // Confidence is high
+interface Windows {
+  activeWindowParsedByArc: Space; // Confidence is mid. It's what arc says was last used, after testing it showed not to be robust
+  openWindows: Space[]; // Confidence is high
 }
 
 interface Profile {
@@ -20,24 +25,30 @@ interface Profile {
 export class ArcMacService {
   private readonly initializationPromise: Promise<void>;
 
-  public sidebar;
-  public windows;
-  public spaces: Space[] = [];
+  public sidebarArcData: unknown
+  public windowsArcData: StorableWindows
+  public spacesMap: Space[] = [];
   public profiles: Profile[];
-  public lastFocused: LastFocused;
+  public windows: Windows;
 
   constructor() {
     this.initializationPromise = this.initialize();
   }
 
   private async initialize() {
-    const { sidebar, windows, spaces, lastFocused, profileGroup } = await this.getData();
+    const sidebarPromise = this.getStorableSidebar();
+    const windowsPromise = this.getStorableWindows();
 
-    this.sidebar = sidebar;
-    this.windows = windows;
-    this.spaces = spaces;
-    this.lastFocused = lastFocused;
-    this.profiles = profileGroup;
+    const [$sidebar, $windows] = await Promise.all([
+      sidebarPromise,
+      windowsPromise,
+    ]);
+
+    this.sidebarArcData = $sidebar;
+    this.windowsArcData = $windows;
+    this.spacesMap = this.parseSpaces($sidebar); // Spaces must be parsed before windows
+    this.windows = this.parseWindows($windows); // Depends on parsed spaces
+    this.profiles = this.parseProfileSpaces($sidebar);
 
     this.inferMissingSpaceNames();
   }
@@ -47,38 +58,20 @@ export class ArcMacService {
     return true;
   }
 
-  async getData() {
-    const sidebarPromise = this.getStorableSidebar();
-    const windowsPromise = this.getStorableWindows();
-
-    const [$sidebar, $windows] = await Promise.all([
-      sidebarPromise,
-      windowsPromise,
-    ]);
-
-    return {
-      sidebar: $sidebar,
-      windows: $windows,
-      spaces: this.parseSpaces($sidebar),
-      lastFocused: this.parseWindows($windows),
-      profileGroup: this.parseProfileSpaces($sidebar),
-    };
-  }
-
   private getStorableSidebar = async () => {
     const { username } = os.userInfo();
 
-    return readJsonFile(
-      `/Users/${username}/Library/Application Support/Arc/StorableSidebar.json`,
-    );
+    const path = `/Users/${username}/Library/Application Support/Arc/StorableSidebar.json`;
+
+    return readJsonFile(path);
   };
 
   private getStorableWindows = async (): Promise<any> => {
     const { username } = os.userInfo();
 
-    return readJsonFile(
-      `/Users/${username}/Library/Application Support/Arc/StorableWindows.json`,
-    );
+    const path = `/Users/${username}/Library/Application Support/Arc/StorableWindows.json`;
+
+    return readJsonFile(path);
   };
 
   private parseSpaces(jsonData: unknown): Space[] {
@@ -120,24 +113,34 @@ export class ArcMacService {
     return spaces;
   }
 
-  private parseWindows(jsonData: unknown): LastFocused {
-    const lastFocused: LastFocused = {
-      global: null,
-      windows: [],
+  private parseWindows(jsonData: StorableWindows): Windows {
+    const parsed: Windows = {
+      activeWindowParsedByArc: null,
+      openWindows: [],
     };
 
-    if (!jsonData) return lastFocused;
+    if (!jsonData) return parsed;
 
-    const data = jsonData as Record<string, unknown>;
+    const data = jsonData as Record<string, unknown> & {
+      windows: Record<string, unknown>[];
+      lastFocusedSpaceID: string;
+    };
+
     if (!data.windows || !Array.isArray(data.windows)) {
-      return lastFocused;
+      return parsed;
     }
 
-    lastFocused.global = data.lastFocusedSpaceID as string | undefined;
+    if (this.spacesMap.length === 0)
+      console.error("No spaces found when parsing windows");
+
+    parsed.activeWindowParsedByArc = {
+      id: data.lastFocusedSpaceID as string | undefined,
+      name: this.getSpaceById(this.spacesMap, data.lastFocusedSpaceID)?.name,
+    };
 
     const windows = data.windows;
     if (windows.length === 0) {
-      return lastFocused;
+      return parsed;
     }
 
     const getMaxFromOddIndices = (dates: number[]): number => {
@@ -146,20 +149,24 @@ export class ArcMacService {
       }, -1);
     };
 
-    lastFocused.windows = windows.map(
+    parsed.openWindows = windows
+    .map(
       (item: {
         focusedSpaceID: string;
         itemLastActiveDates: number[];
         itemCreatedDates: number[];
-      }) => ({
-        spaceId: item.focusedSpaceID,
-        lastActivatedItem: Math.max(
+      }): Space => ({
+        id: item.focusedSpaceID,
+        name: this.getSpaceById(this.spacesMap, item.focusedSpaceID)?.name,
+        lastChangeDate: Math.max(
           getMaxFromOddIndices(item.itemCreatedDates),
           getMaxFromOddIndices(item.itemLastActiveDates),
         ),
       }),
-    );
-    return lastFocused;
+    )
+    .sort((a, b) => b.lastChangeDate - a.lastChangeDate);
+
+    return parsed;
   }
 
   private parseProfileSpaces(jsonData: unknown): Profile[] {
@@ -226,7 +233,7 @@ export class ArcMacService {
 
     if (space) return space;
 
-//    console.error(`Space with id ${id} not found`);
+    console.error(`Space with id ${id} not found`);
   }
 
   private inferMissingSpaceNames() {
@@ -254,15 +261,15 @@ export class ArcMacService {
           space.name = inferredName;
 
           // Also update the corresponding space in this.spaces array
-          const globalSpaceIndex = this.spaces.findIndex(
+          const globalSpaceIndex = this.spacesMap.findIndex(
             (s) => s.id === space.id,
           );
           if (globalSpaceIndex !== -1) {
-            this.spaces[globalSpaceIndex].name = inferredName;
+            this.spacesMap[globalSpaceIndex].name = inferredName;
             //            console.log(`Updated global spaces array for ${space.id}: ${inferredName}`);
           } else {
             // If space doesn't exist in global spaces array, add it
-            this.spaces.push({
+            this.spacesMap.push({
               id: space.id,
               name: inferredName,
               //              lastChangeDate: space.lastChangeDate,
@@ -277,29 +284,26 @@ export class ArcMacService {
     });
   }
 
+  /**
+   * We will use last active window data to parse the space name attached to it when possible.
+   * Some temporary windows might not have a space name, so we will use the one parsed by Arc.
+   * But before we do that, we will try to infer the space name from the window profile.
+   * */
   async getLastActiveSpaceName() {
     await this.isReady();
 
-    const mostRecentWindow = this.lastFocused.windows
-      .map(({ spaceId, ...rest }) => {
-        return {
-          space: this.getSpaceById(this.spaces, spaceId),
-          ...rest,
-        };
-      })
-      .sort((a, b) => b.lastActivatedItem - a.lastActivatedItem);
-
-    // We are interested in very latest window. It might or might not have a space name
-    // If has, simply return it.
-    if (mostRecentWindow[0] && mostRecentWindow[0].space) {
-      return mostRecentWindow[0].space.name;
+    // We are interested in the very latest opened window.
+    //
+    // Parsed open window might or might not have a space name
+    // > It does not have a space name if it's a new window made by
+    // > dragging tab outside, and it has a profile which is shared
+    // > by multiple spaces
+    if (this.windows.openWindows[0] && this.windows.openWindows[0].name) {
+      return this.windows.openWindows[0].name;
     }
 
-    // Otherwise fallback to global focused space. Which means that space name will be inferred
-    // From the root window. Whichever space is active there.
-    const globalSpace = this.spaces.find(
-      ({ id }) => id === this.lastFocused.global,
-    );
-    return globalSpace?.name;
+    // In case the last active window has no space name, we trust
+    // parsing done by Arc itself
+    return this.windows.activeWindowParsedByArc.name
   }
 }
