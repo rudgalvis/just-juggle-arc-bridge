@@ -11,6 +11,10 @@
     "publish": "dotenv -e .env.development -- electron-forge publish",
     "distribute": "dotenv -e .env.development -- node ./package-distribution.js",
     "lint": "eslint --ext .ts,.tsx .",
+    "demo": "npm run build:native-active-window && npm run demo:server",
+    "demo:server": "ts-node --project tsconfig.test.json src/services/server.ts",
+    "build:native-active-window": "cd ../node-active-window && npm run build && cp -r build ../bridge-beta/src/services/native-active-window && cd ../bridge-beta",
+    "clean-run": "ts-node --project tsconfig.test.json src/services/clean.ts",
     "dev-server": "dotenv -e .env.development -- nodemon --watch src src/server/local-serve-dev.ts"
   },
   "devDependencies": {
@@ -25,7 +29,9 @@
     "@electron-forge/plugin-vite": "^7.4.0",
     "@electron-forge/shared-types": "^7.4.0",
     "@electron/fuses": "^1.7.0",
+    "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
+    "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "concurrently": "^8.2.2",
@@ -38,7 +44,6 @@
     "ts-node": "^10.9.2",
     "typescript": "~4.5.4",
     "vite": "^5.1.6",
-    "@types/cors": "^2.8.17",
     "vitest": "^1.6.1"
   },
   "keywords": [],
@@ -48,11 +53,15 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@paymoapp/active-window": "^2.1.2",
+    "active-win": "^9.0.0",
+    "cors": "^2.8.5",
     "electron-auto-launch": "^5.0.7",
     "electron-squirrel-startup": "^1.0.0",
     "express": "^4.18.3",
+    "get-windows": "^9.2.0",
     "nodemon": "^3.1.0",
     "rollup-plugin-copy": "^3.5.0",
-    "cors": "^2.8.5"
+    "ws": "^8.18.3"
   }
 }

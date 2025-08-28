@@ -8,6 +8,17 @@ type StorableWindows = Record<string, unknown> & {
   lastFocusedSpaceID: string;
 };
 
+enum Confidence {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+}
+
+type LastActiveSpace =  {
+  name: string
+  confidence: Confidence
+}
+
 interface Space {
   id: string;
   name?: string;
@@ -292,7 +303,7 @@ export class ArcMacService {
    * Some temporary windows might not have a space name, so we will use the one parsed by Arc.
    * But before we do that, we will try to infer the space name from the window profile.
    * */
-  async getLastActiveSpaceName() {
+  async getLastActiveSpaceName(): Promise<{name: string, confidence: Confidence}> {
     await this.isReady();
 
     // We are interested in the very latest opened window.
@@ -301,12 +312,24 @@ export class ArcMacService {
     // > It does not have a space name if it's a new window made by
     // > dragging tab outside, and it has a profile which is shared
     // > by multiple spaces
+    let fromActiveWindow: string = undefined
     if (this.windows.openWindows[0] && this.windows.openWindows[0].name) {
-      return this.windows.openWindows[0].name;
+      fromActiveWindow = this.windows.openWindows[0].name
     }
 
     // In case the last active window has no space name, we trust
     // parsing done by Arc itself
-    return this.windows.activeWindowParsedByArc.name
+    const fromArc = this.windows.activeWindowParsedByArc.name
+
+    if(fromActiveWindow)
+      return {
+        name: fromActiveWindow,
+        confidence: fromActiveWindow === fromArc ? Confidence.HIGH : Confidence.MEDIUM
+      }
+
+    return {
+      name: this.windows.activeWindowParsedByArc.name,
+      confidence: Confidence.LOW
+    }
   }
 }

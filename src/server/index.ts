@@ -1,6 +1,6 @@
 import express, { type NextFunction } from 'express'
 import cors from "cors";
-import { ArcMacService } from "../services/arc-mac.service";
+import { ArcMacService } from "../services/ArcMacService";
 
 const server = express();
 const port = process.env.PORT || 55513; // random port representing JJGLE where 5 is J & G, 1 is L, 3 is E
