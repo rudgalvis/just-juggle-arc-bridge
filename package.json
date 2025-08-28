@@ -12,7 +12,7 @@
     "distribute": "dotenv -e .env.development -- node ./package-distribution.js",
     "lint": "eslint --ext .ts,.tsx .",
     "demo": "npm run build:native-active-window && npm run demo:server",
-    "demo:server": "ts-node --project tsconfig.test.json src/services/server.ts",
+    "demo:server": "ts-node --project tsconfig.test.json src/services/server2.ts",
     "build:native-active-window": "cd ../node-active-window && npm run build && cp -r build ../bridge-beta/src/services/native-active-window && cd ../bridge-beta",
     "clean-run": "ts-node --project tsconfig.test.json src/services/clean.ts",
     "dev-server": "dotenv -e .env.development -- nodemon --watch src src/server/local-serve-dev.ts"

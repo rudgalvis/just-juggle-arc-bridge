@@ -11,13 +11,13 @@ const SUPPORTED_PLATFORMS = ['win32', 'linux', 'darwin'];
 let addon: Module<NativeWindowInfo> | undefined;
 
 if (SUPPORTED_PLATFORMS.includes(process.platform)) {
-	addon = require('./build/Release/PaymoActiveWindow.node'); // eslint-disable-line import/no-dynamic-require
+  addon = require("./build/Release/PaymoActiveWindow.node"); // eslint-disable-line import/no-dynamic-require
 } else {
-	throw new Error(
-		`Unsupported platform. The supported platforms are: ${SUPPORTED_PLATFORMS.join(
-			','
-		)}`
-	);
+  throw new Error(
+    `Unsupported platform. The supported platforms are: ${SUPPORTED_PLATFORMS.join(
+      ",",
+    )}`,
+  );
 }
 
 class NativeActiveWindow implements IActiveWindow {
@@ -63,17 +63,42 @@ class NativeActiveWindow implements IActiveWindow {
 		}
 	}
 
-	public requestPermissions(): boolean {
-		if (!addon) {
-			throw new Error('Failed to load native addon');
-		}
+  public requestPermissions(): boolean {
+    if (!addon) {
+      throw new Error("Failed to load native addon");
+    }
 
-		if (addon.requestPermissions) {
-			return addon.requestPermissions();
-		}
+    if (
+      !addon.hasAccessibilityPermission ||
+      !addon.requestAccessibilityPermissions
+    ) {
+      throw new Error("Failed to load native addon");
+    }
 
-		return true;
-	}
+    // First check if we already have permissions
+    const hasPermission = addon.hasAccessibilityPermission();
+    console.log("Current accessibility permission:", hasPermission);
+
+    if (!hasPermission) {
+      console.log("Requesting accessibility permissions...");
+
+      // Request permissions - this will show the system dialog
+      const granted = addon.requestAccessibilityPermissions();
+
+      if (!granted) {
+        console.log("Permission not granted immediately.");
+        console.log(
+          "Please go to System Preferences > Security & Privacy > Privacy > Accessibility",
+        );
+        console.log("and enable access for this application.");
+
+        // You might want to poll or ask user to refresh
+        return false;
+      }
+    }
+
+    return true;
+  }
 
 	public getActiveWindow(): WindowInfo {
 		if (!addon) {
@@ -130,6 +155,6 @@ class NativeActiveWindow implements IActiveWindow {
 
 const ActiveWindow = new NativeActiveWindow();
 
-export * from './types';
+export * from "./types";
 export { ActiveWindow };
 export default ActiveWindow;

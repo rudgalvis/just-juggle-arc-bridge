@@ -25,6 +25,10 @@ export interface Module<T> {
 	unsubscribe(watchId: number): void;
 	initialize?(): void;
 	requestPermissions?(): boolean;
+	requestAccessibilityPermissions?(): boolean;
+	hasAccessibilityPermission?(): boolean;
+	refreshAccessibilityStatus?(): boolean;
+	getArcActiveSpace?(): string;
 	runLoop?(): void;
 }
 
