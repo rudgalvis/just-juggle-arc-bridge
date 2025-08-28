@@ -1,4 +1,3 @@
-import { measurePerformance } from "../utils/measure-performance";
 import ActiveWindow, {
   type WindowInfo,
 } from "./node-active-window/NodeActiveWindow";
@@ -7,7 +6,7 @@ type ListenerOptions = {
   updateArcSpaceOnChange?: boolean;
 };
 
-export class ArcSpaceMonitor {
+export class ArcNativeModulesMonitor {
   private getArcSpaceDebouncer: NodeJS.Timeout | null = null;
 
   private watcherId: number | undefined;
@@ -38,10 +37,16 @@ export class ArcSpaceMonitor {
     return this.space = space
   }
 
-  public gracefulShutDown(signal: string) {
-    if (!this.watcherId) process.exit(0);
+  public cleanup() {
+    if (!this.watcherId) return
 
-    console.log(`Received ${signal}. Shutting down gracefully...`);
+    ActiveWindow.unsubscribe(this.watcherId);
+  }
+
+  public gracefulShutDown(signal?: string) {
+    console.log(`${signal ? `Received ${signal}. ` : ''}Shutting down gracefully...`);
+
+    if (!this.watcherId) process.exit(0);
 
     ActiveWindow.unsubscribe(this.watcherId);
 
@@ -55,13 +60,11 @@ export class ArcSpaceMonitor {
     if (windowInfo.application !== "Arc") return null;
 
     try {
-      const space = await this.getActiveWindowSpace();
-
-      this.space = space;
+      this.getActiveWindowSpace()
     } catch (e) {
       console.error(e);
     }
   }
 }
 
-export default ArcSpaceMonitor;
+export default ArcNativeModulesMonitor;

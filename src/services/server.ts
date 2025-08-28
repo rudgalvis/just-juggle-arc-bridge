@@ -3,9 +3,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 
 import { onProcessClose } from '../utils/on-process-close'
-import { ArcSpaceMonitor } from './ArcSpaceMonitor'
+import { ArcNativeModulesMonitor } from './ArcNativeModulesMonitor'
 
-const arcSpaceMonitor = new ArcSpaceMonitor();
+const arcSpaceMonitor = new ArcNativeModulesMonitor();
 
 arcSpaceMonitor.listenForWindowsChange({ updateArcSpaceOnChange: true });
 
