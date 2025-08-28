@@ -35,7 +35,7 @@ interface Profile {
   spaces: Space[];
 }
 
-export class ArcMacService {
+export class ArcMacStorablesParser {
   private readonly initializationPromise: Promise<void>;
 
   public sidebarArcData: unknown

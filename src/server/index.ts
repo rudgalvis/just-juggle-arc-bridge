@@ -1,9 +1,14 @@
 import express, { type NextFunction } from 'express'
 import cors from "cors";
-import { ArcMacService } from "../services/ArcMacService";
+import { ArcMacStorablesParser } from "../services/ArcMacStorablesParser";
+import ArcSpaceMonitor from '../services/ArcSpaceMonitor'
+
+const arcSpaceMonitor = new ArcSpaceMonitor();
+arcSpaceMonitor.listenForWindowsChange({ updateArcSpaceOnChange: true });
 
 const server = express();
 const port = process.env.PORT || 55513; // random port representing JJGLE where 5 is J & G, 1 is L, 3 is E
+
 server.use((req, res, next) => {
   next();
 }, cors({ maxAge: 84600 }));
@@ -16,8 +21,7 @@ server.get("/ping", async (req, res) => {
 server.get("/recent-space", async (_, res) => {
   if (process.env.MODE === "test") console.time(`Space name parsed`);
 
-  const arcMacService = new ArcMacService();
-  const spaceName = await arcMacService.getLastActiveSpaceName();
+  const spaceName = arcSpaceMonitor.getActiveWindowSpace();
 
   if (process.env.MODE === "test") console.timeEnd(`Space name parsed`);
 

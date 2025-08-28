@@ -4,7 +4,7 @@ export enum LogLevel {
 	MINIMAL
 }
 
-export const measurePerformance = async (fn: () => Promise<any> | any, level: LogLevel = LogLevel.MINIMAL) => {
+export const measurePerformance = async <T>(fn: () => Promise<T> | T, level: LogLevel = LogLevel.MINIMAL) => {
 	// Memory usage before
 	const memoryBefore = process.memoryUsage();
 
